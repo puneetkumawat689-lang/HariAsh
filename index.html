@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Hari Ash Natural Organics | Fresh Peeled Garlic &amp; Vegetable Supplier</title>
+<meta name="description" content="Fresh peeled garlic, garlic paste, cut vegetables and organic products. Daily fresh supply. Call: 8952919243" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+<script src="https://cdn.tailwindcss.com/3.4.17"></script>
+<script>
+tailwind.config = { theme: { extend: {
+  colors: { brand: { 50:'#f2fbf4',100:'#e1f7e6',500:'#16a34a',600:'#15803d',700:'#14532d',800:'#0f3f22',900:'#092715' }, gold:'#d97706' },
+  fontFamily: { sans:['Inter','sans-serif'], serif:['Playfair Display','serif'] }
+}}}
+</script>
+<style>html{scroll-behavior:smooth}.reveal{opacity:0;transition:opacity .7s cubic-bezier(.2,.7,.2,1),transform .7s cubic-bezier(.2,.7,.2,1);transition-delay:var(--d,0s);transform:translateY(28px)}.reveal.in{opacity:1;transform:none}@keyframes floaty{0%,to{transform:translateY(0)rotate(-1deg)}50%{transform:translateY(-14px)rotate(1.5deg)}}@keyframes pop{0%{transform:scale(1)}40%{transform:scale(1.35)}to{transform:scale(1)}}@keyframes rise{0%{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}@keyframes marquee{to{transform:translate(-50%)}}.floaty{animation:6s ease-in-out infinite floaty}.pop{animation:.35s pop}.rise{opacity:0;animation:.8s cubic-bezier(.2,.7,.2,1) forwards rise;animation-delay:var(--d,0s)}.marquee{animation:28s linear infinite marquee}.card-in{animation:.45s both rise}@media (prefers-reduced-motion:reduce){.reveal,.rise{opacity:1;transition:none;animation:none;transform:none}.floaty,.marquee,.pop,.card-in{animation:none}}</style>
+</head>
+<body class="bg-gray-50 text-gray-800 font-sans antialiased">
+<div id="root"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+
+<script type="text/babel">
+const { useState, useEffect, useRef, useMemo } = React;
+
+/* ---------- Config & data ---------- */
+const WA = "918952919243";
+const IMG = "./assets/images/";
+const PRODUCTS = [
+  { id:1, name:"Fresh Peeled Garlic", cat:"garlic", tag:"Best Seller", tagCls:"bg-amber-500", img:"peeled_garlic_hero.png", emoji:"🧄", desc:"Daily peeled, hygienic & ready to use garlic cloves",
+    sizes:[["250g",80],["500g",150],["1kg",290],["5kg",1400]] },
+  { id:2, name:"Fresh Garlic Paste", cat:"paste", tag:"Pure", tagCls:"bg-brand-600", img:"garlic_paste.png", emoji:"🥣", desc:"Smooth, freshly ground garlic paste — no additives",
+    sizes:[["200g",70],["500g",160],["1kg",300]] },
+  { id:3, name:"Mixed Cut Vegetable Pack", cat:"vegetables", tag:"Daily Fresh", tagCls:"bg-blue-600", img:"cut_vegetables_pack.png", emoji:"🥕", desc:"Carrots, beans, capsicum, onions & more — ready to cook",
+    sizes:[["500g",65],["1kg",120],["2kg",230]] },
+  { id:8, name:"Bulk Peeled Garlic", cat:"garlic", tag:"Bulk", tagCls:"bg-brand-900", img:"peeled_garlic_hero.png", emoji:"🧄", desc:"Restaurant & hotel supply — 5kg to 25kg orders",
+    sizes:[["5kg",1350],["10kg",2600],["25kg",6250]] },
+];
+const CATEGORIES = [
+  ["Peeled Garlic","Fresh daily peeled garlic cloves","peeled_garlic_hero.png","🧄"],
+  ["Cut Vegetable Packs","Ready-to-cook fresh cuts","cut_vegetables_pack.png","🥕"],
+  ["Garlic Paste","Smooth, fresh paste","garlic_paste.png","🥣"],
+  ["Peeled Onions","Small & big onions peeled","peeled_onions.png","🧅"],
+  ["Organic Health Items","Pure organic spices & more","organic_turmeric.png","🌿"],
+];
+
+/* ---------- Hooks & helpers ---------- */
+function useInView(once = true) {
+  const ref = useRef(null);
+  const [seen, setSeen] = useState(false);
+  useEffect(() => {
+    const el = ref.current; if (!el) return;
+    if (!("IntersectionObserver" in window)) { setSeen(true); return; }
+    const io = new IntersectionObserver(([e]) => { if (e.isIntersecting) { setSeen(true); if (once) io.disconnect(); } }, { threshold: 0.15 });
+    io.observe(el); return () => io.disconnect();
+  }, []);
+  return [ref, seen];
+}
+function Reveal({ children, delay = 0, className = "", as: Tag = "div" }) {
+  const [ref, seen] = useInView();
+  return <Tag ref={ref} style={{ "--d": delay + "ms" }} className={`reveal ${seen ? "in" : ""} ${className}`}>{children}</Tag>;
+}
+function Img({ src, emoji, alt, className = "" }) {
+  const [bad, setBad] = useState(false);
+  if (bad) return <div role="img" aria-label={alt} className={`flex items-center justify-center text-6xl bg-gradient-to-br from-brand-100 to-amber-50 ${className}`}>{emoji}</div>;
+  return <img src={IMG + src} alt={alt} onError={() => setBad(true)} className={className} />;
+}
+function Count({ to, suffix = "" }) {
+  const [ref, seen] = useInView();
+  const [n, setN] = useState(0);
+  useEffect(() => {
+    if (!seen) return; let t0;
+    const step = (t) => { t0 = t0 || t; const p = Math.min((t - t0) / 1400, 1); setN(Math.round(to * (1 - Math.pow(1 - p, 3)))); if (p < 1) requestAnimationFrame(step); };
+    requestAnimationFrame(step);
+  }, [seen]);
+  return <span ref={ref}>{n}{suffix}</span>;
+}
+const SectionHead = ({ tag, title, sub }) => (
+  <Reveal className="text-center max-w-2xl mx-auto mb-12">
+    <span className="text-xs font-bold uppercase tracking-widest text-brand-600 bg-brand-100 px-3 py-1 rounded-full">{tag}</span>
+    <h2 className="text-3xl font-serif font-bold text-gray-900 mt-3">{title}</h2>
+    {sub && <p className="text-gray-600 text-sm mt-2">{sub}</p>}
+  </Reveal>
+);
+
+/* ---------- Header ---------- */
+function Header({ cartCount, wish, query, setQuery, openCart, bump }) {
+  const [menu, setMenu] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  useEffect(() => { const f = () => setScrolled(window.scrollY > 10); f(); window.addEventListener("scroll", f); return () => window.removeEventListener("scroll", f); }, []);
+  const links = [["#products","Products"],["#organic","Organic Health"],["#bulk","Bulk Supply"],["#about","About Us"],["#contact","Contact"]];
+  return (
+    <header className={`sticky top-0 z-40 bg-white/95 backdrop-blur border-b border-gray-100 transition-shadow ${scrolled ? "shadow-md" : ""}`}>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-20 gap-4">
+        <a href="#" className="flex items-center gap-3 group shrink-0">
+          <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-brand-700 to-brand-500 flex items-center justify-center text-white font-black text-xl shadow-md group-hover:rotate-6 transition-transform">H<span className="text-amber-400">A</span></div>
+          <div className="flex flex-col"><span className="text-xl font-extrabold leading-tight">Hari<span className="text-gold">Ash</span></span><span className="text-[10px] uppercase font-bold tracking-widest text-brand-600">Natural Organics</span></div>
+        </a>
+        <div className="hidden lg:flex flex-1 max-w-lg relative items-center">
+          <i className="fas fa-search absolute left-4 text-gray-400"></i>
+          <input value={query} onChange={e => setQuery(e.target.value)} placeholder="Search garlic, vegetables, paste..." className="w-full pl-11 pr-4 py-2.5 rounded-full bg-gray-100 border border-transparent focus:border-brand-500 focus:bg-white focus:ring-2 focus:ring-brand-500/20 text-sm outline-none transition" />
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="relative p-2.5 text-gray-600" title="Wishlist"><i className="far fa-heart text-xl"></i>
+            <span key={wish} className={`absolute top-1 right-1 w-4 h-4 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center ${wish ? "pop" : ""}`}>{wish}</span></div>
+          <button onClick={openCart} aria-label="Open cart" className="relative p-2.5 text-gray-600 hover:text-brand-600 transition"><i className="fas fa-shopping-basket text-xl"></i>
+            <span key={bump} className="pop absolute top-1 right-1 w-4 h-4 rounded-full bg-brand-600 text-white text-[10px] font-bold flex items-center justify-center">{cartCount}</span></button>
+          <a href="tel:8952919243" className="hidden sm:inline-flex items-center gap-2 px-4 py-2 rounded-full bg-brand-600 hover:bg-brand-700 text-white text-sm font-semibold shadow transition"><i className="fas fa-phone"></i> Call Now</a>
+          <button className="md:hidden p-2 text-gray-600" onClick={() => setMenu(m => !m)} aria-label="Menu"><i className={`fas ${menu ? "fa-times" : "fa-bars"} text-xl`}></i></button>
+        </div>
+      </div>
+      <nav className={`border-t border-gray-100 bg-gray-50/70 overflow-hidden transition-all duration-300 md:max-h-14 ${menu ? "max-h-72" : "max-h-0 md:max-h-14"}`}>
+        <div className="flex flex-col md:flex-row items-center justify-center md:space-x-8 py-3 text-sm font-medium text-gray-700 gap-3 md:gap-0">
+          {links.map(([h, t]) => <a key={h} href={h} onClick={() => setMenu(false)} className="hover:text-brand-600 transition">{t}</a>)}
+        </div>
+      </nav>
+    </header>
+  );
+}
+
+/* ---------- Hero ---------- */
+function Hero() {
+  const d = (n) => ({ "--d": n + "ms" });
+  return (
+    <section className="relative overflow-hidden bg-gradient-to-b from-brand-50/70 to-white py-16 lg:py-24">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid lg:grid-cols-12 gap-12 items-center">
+        <div className="lg:col-span-7 space-y-6 text-center lg:text-left">
+          <div style={d(0)} className="rise inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-brand-100 text-brand-700 text-xs font-bold tracking-wide"><i className="fas fa-star text-gold"></i> PURE · FRESH · HEALTHY · TRUSTED</div>
+          <h1 style={d(120)} className="rise text-4xl sm:text-5xl lg:text-6xl font-serif font-extrabold text-gray-900 leading-[1.15]">Fresh-Peeled Garlic &amp; <span className="text-brand-600">Cut Vegetables</span>, Ready for Your Kitchen</h1>
+          <p style={d(240)} className="rise text-gray-600 text-base sm:text-lg max-w-xl mx-auto lg:mx-0">Daily fresh supply of peeled garlic, garlic paste, cut vegetable packs and organic health products. Hygienic, preservative-free and trusted by restaurants, hotels &amp; caterers.</p>
+          <div style={d(360)} className="rise flex flex-wrap justify-center lg:justify-start gap-3">
+            {["100% Natural","No Preservatives","Bulk Orders"].map(t => <span key={t} className="flex items-center gap-1.5 text-sm font-semibold bg-white px-3 py-1 rounded-md border border-gray-200 shadow-sm"><i className="fas fa-check-circle text-brand-600"></i> {t}</span>)}
+          </div>
+          <div style={d(480)} className="rise flex flex-wrap justify-center lg:justify-start gap-4 pt-2">
+            <a href="#products" className="inline-flex items-center gap-2 px-7 py-3.5 rounded-full bg-brand-600 hover:bg-brand-700 text-white font-semibold text-sm shadow-lg shadow-brand-600/25 transition hover:-translate-y-0.5"><i className="fas fa-shopping-basket"></i> Explore Products</a>
+            <a href={`https://wa.me/${WA}`} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 px-7 py-3.5 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-sm shadow-lg shadow-emerald-600/25 transition hover:-translate-y-0.5"><i className="fab fa-whatsapp text-lg"></i> WhatsApp Order</a>
+          </div>
+          <div style={d(600)} className="rise grid grid-cols-3 gap-4 max-w-md mx-auto lg:mx-0 pt-4">
+            {[[500,"+","Kitchens served"],[100,"%","Natural"],[24,"h","Same-day pack"]].map(([n,s,l]) => <div key={l}><div className="text-2xl font-extrabold text-brand-700"><Count to={n} suffix={s} /></div><div className="text-[11px] text-gray-500">{l}</div></div>)}
+          </div>
+        </div>
+        <div style={d(300)} className="rise lg:col-span-5 flex justify-center">
+          <div className="relative w-72 sm:w-96 aspect-square rounded-full p-4 bg-gradient-to-tr from-brand-100 via-amber-100 to-white shadow-2xl flex items-center justify-center">
+            <Img src="peeled_garlic_hero.png" emoji="🧄" alt="Fresh Peeled Garlic" className="floaty w-full h-full object-contain drop-shadow-2xl rounded-full" />
+            <div className="absolute -top-3 -right-3 bg-white/90 backdrop-blur border border-amber-200 rounded-2xl p-3 shadow-xl text-center text-xs font-bold"><i className="fas fa-award text-gold text-lg mb-1 block"></i>Best Quality<br />Best Price</div>
+            <div className="absolute -bottom-3 -left-3 bg-white/90 backdrop-blur border border-brand-100 rounded-2xl p-3 shadow-xl text-center text-xs font-bold"><i className="fas fa-leaf text-brand-600 text-lg mb-1 block"></i>Farm to<br />Kitchen</div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ---------- Marquee features ---------- */
+function Features() {
+  const items = [["fa-seedling","Daily Fresh Supply"],["fa-shield-alt","Hygienic & Premium"],["fa-clock","Save Kitchen Time"],["fa-handshake","Trusted by Hotels & Caterers"],["fa-box-open","Custom Packing"]];
+  const row = [...items, ...items];
+  return (
+    <section className="py-5 bg-brand-900 text-brand-100 overflow-hidden border-y border-brand-800">
+      <div className="marquee flex w-max gap-12 whitespace-nowrap">
+        {row.map(([i, t], k) => <span key={k} className="flex items-center gap-2 text-sm font-semibold"><i className={`fas ${i} text-emerald-400`}></i>{t}</span>)}
+      </div>
+    </section>
+  );
+}
+
+/* ---------- Categories ---------- */
+function Categories({ goFilter }) {
+  return (
+    <section className="py-16" id="categories">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <SectionHead tag="Browse by Category" title="What We Offer" sub="From daily kitchen essentials to bulk restaurant supply" />
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {CATEGORIES.map(([t, s, img, em], i) => (
+            <Reveal key={t} delay={i * 80} className={i === 4 ? "sm:col-span-2" : ""}>
+              <a href="#products" onClick={() => goFilter(i === 1 ? "vegetables" : i === 2 ? "paste" : i === 0 ? "garlic" : "all")} className="group relative block rounded-2xl overflow-hidden shadow-md h-64 bg-white">
+                <Img src={img} emoji={em} alt={t} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent flex flex-col justify-end p-6 text-white">
+                  <h3 className="text-xl font-bold font-serif">{t}</h3>
+                  <p className="text-xs text-gray-300 mt-1 mb-3">{s}</p>
+                  <span className="w-fit px-4 py-2 bg-brand-600 group-hover:bg-brand-500 text-xs font-semibold rounded-lg transition group-hover:translate-x-1">Shop Now</span>
+                </div>
+              </a>
+            </Reveal>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ---------- Products ---------- */
+function ProductCard({ p, addToCart, wished, toggleWish, i }) {
+  const [sel, setSel] = useState(0);
+  const [added, setAdded] = useState(false);
+  const [size, price] = p.sizes[sel];
+  const add = () => { addToCart(p, size, price); setAdded(true); setTimeout(() => setAdded(false), 1200); };
+  return (
+    <div style={{ animationDelay: i * 60 + "ms" }} className="card-in group bg-white border border-gray-200 rounded-2xl overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col">
+      <div className="relative bg-gray-50 p-6 flex items-center justify-center overflow-hidden">
+        <Img src={p.img} emoji={p.emoji} alt={p.name} className="h-44 w-full object-contain group-hover:scale-110 group-hover:-rotate-2 transition-transform duration-500" />
+        <span className={`absolute top-3 left-3 ${p.tagCls} text-white text-[10px] font-extrabold px-2.5 py-1 rounded-md shadow-sm`}>{p.tag}</span>
+        <button onClick={() => toggleWish(p.id)} aria-label="Wishlist" className="absolute top-3 right-3 w-8 h-8 rounded-full bg-white shadow-sm flex items-center justify-center hover:scale-110 transition">
+          <i key={String(wished)} className={`${wished ? "fas text-rose-500 pop" : "far text-gray-500"} fa-heart text-sm`}></i>
+        </button>
+      </div>
+      <div className="p-5 flex flex-col flex-1 justify-between">
+        <div>
+          <h4 className="font-bold text-gray-900 group-hover:text-brand-600 transition">{p.name}</h4>
+          <p className="text-xs text-gray-500 mt-1">{p.desc}</p>
+          <div className="flex flex-wrap gap-1.5 mt-4">
+            {p.sizes.map(([s], k) => <button key={s} onClick={() => setSel(k)} className={`px-2.5 py-1 text-[11px] font-medium border rounded-md transition ${k === sel ? "border-brand-600 bg-brand-50 text-brand-700" : "border-gray-200 text-gray-600 hover:border-gray-400"}`}>{s}</button>)}
+          </div>
+        </div>
+        <div className="flex items-center justify-between pt-5 mt-4 border-t border-gray-100">
+          <div><span key={price} className="card-in text-lg font-extrabold inline-block">₹ {price}</span> <span className="text-xs text-gray-500">/ {size}</span></div>
+          <button onClick={add} className={`px-4 py-2 text-white rounded-lg text-xs font-bold flex items-center gap-1.5 transition active:scale-95 ${added ? "bg-gold" : "bg-brand-600 hover:bg-brand-700"}`}>
+            <i className={`fas ${added ? "fa-check" : "fa-plus"}`}></i> {added ? "Added" : "Add"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+function Products({ filter, setFilter, query, addToCart, wishlist, toggleWish }) {
+  const tabs = [["all","All Products"],["garlic","Garlic"],["vegetables","Vegetables"],["organic","Organic"],["paste","Pastes"]];
+  const list = PRODUCTS.filter(p => (filter === "all" || p.cat === filter) && (p.name + p.desc).toLowerCase().includes(query.toLowerCase().trim()));
+  return (
+    <section className="py-16 bg-white" id="products">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <SectionHead tag="Best Sellers" title="Our Fresh Products" sub="Hygienic, natural and delivered fresh every day" />
+        <div className="flex flex-wrap justify-center gap-2 mb-10">
+          {tabs.map(([k, t]) => <button key={k} onClick={() => setFilter(k)} className={`px-5 py-2 rounded-full text-xs font-semibold transition active:scale-95 ${filter === k ? "bg-brand-600 text-white shadow-sm" : "bg-gray-100 text-gray-600 hover:bg-brand-50 hover:text-brand-700"}`}>{t}</button>)}
+        </div>
+        <div key={filter + query} className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {list.map((p, i) => <ProductCard key={p.id} p={p} i={i} addToCart={addToCart} wished={wishlist.includes(p.id)} toggleWish={toggleWish} />)}
+        </div>
+        {!list.length && <p className="text-center text-gray-500 text-sm py-10">No product found. <a className="text-brand-600 font-semibold" href={`https://wa.me/${WA}`}>Ask us on WhatsApp</a> — we may have it.</p>}
+      </div>
+    </section>
+  );
+}
+
+/* ---------- Organic ---------- */
+function Organic() {
+  const pts = ["Certified organic sourcing","Zero artificial preservatives","Rich in natural nutrients","Safe for all age groups","Trusted by health professionals"];
+  const tiles = [["Turmeric Powder","organic_turmeric.png","🌿"],["Ginger Paste","ginger_paste.png","🫚"],["Salad Mix","fresh_cut_salad.png","🥗"],["Cut Veggie Packs","cut_vegetables_pack.png","🥕"]];
+  return (
+    <section className="py-20 bg-brand-900 text-white" id="organic">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid lg:grid-cols-12 gap-12 items-center">
+        <div className="lg:col-span-6 space-y-6">
+          <Reveal><span className="text-xs font-bold uppercase tracking-widest text-emerald-400 bg-brand-800 px-3.5 py-1 rounded-full">Organic Health Items</span></Reveal>
+          <Reveal delay={100}><h2 className="text-3xl sm:text-4xl font-serif font-bold leading-tight">Pure Organic. <span className="text-amber-400">Naturally Healthy.</span></h2></Reveal>
+          <Reveal delay={200}><p className="text-brand-100/80 leading-relaxed">We source only the finest organic produce — free of pesticides, chemicals and preservatives. Every product carries the promise of nature's purity.</p></Reveal>
+          <ul className="space-y-3 text-sm text-brand-100">{pts.map((t, i) => <Reveal as="li" key={t} delay={300 + i * 90} className="flex items-center gap-2.5"><i className="fas fa-check text-emerald-400"></i> {t}</Reveal>)}</ul>
+          <Reveal delay={800}><a href={`https://wa.me/${WA}`} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-emerald-500 hover:bg-emerald-600 text-white font-semibold text-sm shadow-md transition hover:-translate-y-0.5"><i className="fab fa-whatsapp text-lg"></i> Order Organic Products</a></Reveal>
+        </div>
+        <div className="lg:col-span-6 grid grid-cols-2 gap-4">
+          {tiles.map(([t, img, em], i) => (
+            <Reveal key={t} delay={i * 120}>
+              <div className="group bg-brand-800/60 p-4 rounded-2xl border border-brand-700/50 text-center flex flex-col items-center hover:border-emerald-400/60 hover:-translate-y-1 transition">
+                <Img src={img} emoji={em} alt={t} className="h-28 w-full object-contain group-hover:scale-110 transition-transform duration-500 rounded-xl" />
+                <span className="text-xs font-semibold mt-3">{t}</span>
+              </div>
+            </Reveal>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ---------- Bulk, Why, Testimonials ---------- */
+function Bulk() {
+  const cards = [["fa-utensils","Restaurants","Daily peeled garlic, paste & cut vegetables on subscription"],["fa-hotel","Hotels & Resorts","High-volume customized supply with hygiene guarantee"],["fa-fire-burner","Caterers","Event & daily catering supply — bulk discounts available"],["fa-store","Retail Shops","Branded packs for resale — custom labelling available"]];
+  return (
+    <section className="py-16" id="bulk">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <SectionHead tag="For Businesses" title="Bulk & B2B Supply" sub="We supply restaurants, hotels, caterers, cloud kitchens and food businesses" />
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+          {cards.map(([ic, t, d], i) => (
+            <Reveal key={t} delay={i * 90}><div className="group h-full bg-white p-6 rounded-2xl border border-gray-100 shadow-sm hover:shadow-lg hover:-translate-y-1 transition text-center flex flex-col items-center">
+              <div className="w-14 h-14 rounded-2xl bg-brand-50 text-brand-600 flex items-center justify-center text-2xl mb-4 group-hover:bg-brand-600 group-hover:text-white group-hover:rotate-6 transition"><i className={`fas ${ic}`}></i></div>
+              <h4 className="font-bold mb-1">{t}</h4><p className="text-xs text-gray-500">{d}</p></div></Reveal>
+          ))}
+        </div>
+        <Reveal className="flex flex-wrap justify-center gap-4">
+          <a href={`https://wa.me/${WA}?text=${encodeURIComponent("Hi, I want bulk supply details")}`} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-sm shadow transition"><i className="fab fa-whatsapp text-lg"></i> Get Bulk Quote on WhatsApp</a>
+          <a href="tel:8952919243" className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-white hover:bg-gray-100 border border-gray-300 font-semibold text-sm shadow-sm transition"><i className="fas fa-phone text-brand-600"></i> Call: 8952919243</a>
+        </Reveal>
+      </div>
+    </section>
+  );
+}
+function Why() {
+  const cards = [["fa-seedling","Direct Farm Source","We source directly from farmers, so freshness reaches your kitchen"],["fa-microscope","Quality Checked","Every batch goes through quality and hygiene checks before packing"],["fa-snowflake","Fresh Daily","No frozen, no stored items. Peeled and packed the same day"],["fa-rupee-sign","Competitive Pricing","Best market rates with no compromise on quality"]];
+  return (
+    <section className="py-16 bg-white" id="about">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <SectionHead tag="Why Hari Ash?" title="Freshness You Can Trust" sub="The preferred choice for premium quality natural produce" />
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {cards.map(([ic, t, d], i) => <Reveal key={t} delay={i * 90}><div className="h-full p-6 rounded-2xl bg-gray-50 border border-gray-100 hover:bg-brand-50/60 hover:-translate-y-1 transition">
+            <div className="w-12 h-12 rounded-xl bg-white shadow-sm flex items-center justify-center text-brand-600 text-xl mb-4"><i className={`fas ${ic}`}></i></div>
+            <h4 className="font-bold mb-1">{t}</h4><p className="text-xs text-gray-500 leading-relaxed">{d}</p></div></Reveal>)}
+        </div>
+      </div>
+    </section>
+  );
+}
+function Testimonials() {
+  const T = [["RC","Rajesh Choudhary","Hotel Chef, Jaipur","Excellent peeled garlic quality! Very hygienic and delivered fresh every single morning. Our kitchen cannot function without Hari Ash now."],
+    ["MS","Meena Sharma","Restaurant Owner, Ajmer","We order 10kg of peeled garlic daily for our restaurant. The quality is consistent, price is fair, and delivery is always on time."],
+    ["PK","Priya Kumari","Cloud Kitchen Owner","The cut vegetable packs are a lifesaver for our cloud kitchen. Fresh, clean and ready to use. The organic turmeric is also superb."]];
+  const [a, setA] = useState(1);
+  useEffect(() => { const t = setInterval(() => setA(x => (x + 1) % 3), 4500); return () => clearInterval(t); }, []);
+  return (
+    <section className="py-16">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <SectionHead tag="Customer Love" title="What Our Clients Say" />
+        <div className="grid md:grid-cols-3 gap-6">
+          {T.map(([ini, n, r, q], i) => (
+            <Reveal key={n} delay={i * 100}><div onClick={() => setA(i)} className={`h-full cursor-pointer bg-white p-6 rounded-2xl flex flex-col justify-between transition-all duration-500 ${a === i ? "border-2 border-brand-500 shadow-xl md:-translate-y-2" : "border border-gray-100 shadow-sm"}`}>
+              <div><div className="text-amber-400 text-xs flex gap-1 mb-3">{[0,1,2,3,4].map(k => <i key={k} className="fas fa-star"></i>)}</div><p className="text-sm text-gray-600 leading-relaxed">“{q}”</p></div>
+              <div className="flex items-center gap-3 mt-6 pt-4 border-t border-gray-50"><div className="w-9 h-9 rounded-full bg-brand-100 text-brand-700 font-bold text-xs flex items-center justify-center">{ini}</div><div><strong className="text-xs block">{n}</strong><span className="text-[11px] text-gray-500">{r}</span></div></div>
+            </div></Reveal>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ---------- Contact ---------- */
+function Contact() {
+  const [f, setF] = useState({ name:"", phone:"", product:"", msg:"" });
+  const [err, setErr] = useState("");
+  const set = (k) => (e) => setF({ ...f, [k]: e.target.value });
+  const submit = (e) => {
+    e.preventDefault();
+    if (!f.name.trim() || !f.phone.trim()) { setErr("Please enter your name and phone number."); return; }
+    setErr("");
+    const text = `*New Enquiry - Hari Ash Natural Organics*\nName: ${f.name}\nPhone: ${f.phone}\nProduct: ${f.product || "-"}\nMessage: ${f.msg || "-"}`;
+    window.open(`https://wa.me/${WA}?text=${encodeURIComponent(text)}`, "_blank");
+  };
+  const inp = "w-full px-4 py-2.5 rounded-xl bg-white border border-gray-300 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 text-sm outline-none transition";
+  const opts = ["Peeled Garlic","Garlic Paste","Ginger Garlic Paste","Cut Vegetables Pack","Peeled Onions","Organic Turmeric","Bulk Supply","Custom Packing"];
+  return (
+    <section className="py-16 bg-white" id="contact">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid lg:grid-cols-12 gap-10 items-start">
+        <Reveal className="lg:col-span-6 space-y-6">
+          <span className="text-xs font-bold uppercase tracking-widest text-brand-600 bg-brand-100 px-3 py-1 rounded-full">Get In Touch</span>
+          <h2 className="text-3xl sm:text-4xl font-serif font-bold">Ready to Place Your Order?</h2>
+          <p className="text-sm text-gray-600">Call or WhatsApp us for pricing, bulk orders, custom packs and daily supply arrangements.</p>
+          <div className="grid sm:grid-cols-3 gap-3">
+            {[["tel:8949614889","fa-phone","Call Us","8949614889"],["tel:7239835171","fa-phone","Call Us","7239835171"],[`https://wa.me/${WA}`,"fa-whatsapp","WhatsApp","8952919243"]].map(([h, ic, l, n]) => (
+              <a key={n} href={h} className="flex items-center gap-3 p-3.5 rounded-xl border border-gray-200 hover:border-brand-500 hover:bg-brand-50/50 hover:-translate-y-0.5 transition">
+                <i className={`${ic === "fa-whatsapp" ? "fab text-emerald-600" : "fas text-brand-600"} ${ic} text-xl`}></i>
+                <div><span className="text-[10px] text-gray-500 uppercase block">{l}</span><strong className="text-xs">{n}</strong></div>
+              </a>
+            ))}
+          </div>
+        </Reveal>
+        <Reveal delay={150} className="lg:col-span-6 bg-gray-50 p-6 sm:p-8 rounded-3xl border border-gray-200 shadow-sm">
+          <h3 className="text-lg font-bold mb-4">Send Enquiry</h3>
+          <form onSubmit={submit} className="space-y-4" noValidate>
+            <div><label className="block text-xs font-semibold mb-1">Your Name</label><input className={inp} value={f.name} onChange={set("name")} placeholder="Rajesh Kumar" /></div>
+            <div><label className="block text-xs font-semibold mb-1">Phone / WhatsApp</label><input className={inp} type="tel" value={f.phone} onChange={set("phone")} placeholder="+91 98765 43210" /></div>
+            <div><label className="block text-xs font-semibold mb-1">Product Required</label><select className={inp} value={f.product} onChange={set("product")}><option value="">Select Product</option>{opts.map(o => <option key={o}>{o}</option>)}</select></div>
+            <div><label className="block text-xs font-semibold mb-1">Message / Quantity</label><textarea rows="3" className={inp} value={f.msg} onChange={set("msg")} placeholder="E.g. Need 5kg peeled garlic daily..."></textarea></div>
+            {err && <p className="card-in text-xs text-red-600 font-medium">{err}</p>}
+            <button className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 active:scale-[0.99] text-white font-semibold rounded-xl text-sm flex items-center justify-center gap-2 shadow-md transition"><i className="fab fa-whatsapp text-lg"></i> Send via WhatsApp</button>
+          </form>
+        </Reveal>
+      </div>
+    </section>
+  );
+}
+
+/* ---------- Footer ---------- */
+function Footer() {
+  return (
+    <footer className="bg-gray-900 text-gray-400 py-12 text-xs">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex flex-col md:flex-row md:items-center justify-between pb-8 mb-8 border-b border-gray-800 gap-4">
+          <div><h3 className="text-base font-bold text-white">Hari<span className="text-gold">Ash</span> Natural Organics</h3><p className="text-gray-500">Pure • Fresh • Healthy</p></div>
+          <p className="max-w-md">Freshness You Can Trust — daily fresh supply of peeled garlic, cut vegetables &amp; organic health products.</p>
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-10">
+          <div><h4 className="text-white font-semibold mb-3">Products</h4><ul className="space-y-2">{["Peeled Garlic","Garlic Paste","Cut Vegetable Packs","Peeled Onions"].map(t => <li key={t}><a href="#products" className="hover:text-white transition">{t}</a></li>)}<li><a href="#organic" className="hover:text-white transition">Organic Health Items</a></li></ul></div>
+          <div><h4 className="text-white font-semibold mb-3">Business</h4><ul className="space-y-2">{["Bulk Supply","Custom Packing","Restaurant Supply","Hotel Supply","Catering Supply"].map(t => <li key={t}><a href="#bulk" className="hover:text-white transition">{t}</a></li>)}</ul></div>
+          <div><h4 className="text-white font-semibold mb-3">Company</h4><ul className="space-y-2"><li><a href="#about" className="hover:text-white transition">About Us</a></li><li><a href="#contact" className="hover:text-white transition">Contact</a></li></ul></div>
+          <div><h4 className="text-white font-semibold mb-3">Contact Us</h4><ul className="space-y-2">
+            <li><i className="fas fa-phone mr-1.5 text-brand-500"></i><a href="tel:8952919243" className="hover:text-white">8952919243</a></li>
+            <li><i className="fas fa-envelope mr-1.5 text-emerald-400"></i><a href="mailto:hariashnaturalorganics@gmail.com" className="hover:text-white break-all">hariashnaturalorganics@gmail.com</a></li></ul>
+            <div className="flex gap-2.5 mt-4">{[["fab fa-whatsapp","hover:bg-emerald-600",`https://wa.me/${WA}`],["fab fa-facebook-f","hover:bg-blue-600","#"],["fab fa-instagram","hover:bg-pink-600","#"]].map(([ic, h, l]) => <a key={ic} href={l} aria-label={ic} className={`w-8 h-8 rounded-full bg-gray-800 ${h} text-white flex items-center justify-center hover:-translate-y-1 transition`}><i className={ic}></i></a>)}</div></div>
+        </div>
+        <div className="pt-8 border-t border-gray-800 text-center sm:text-left text-gray-500">&copy; {new Date().getFullYear()} Hari Ash Natural Organics. All rights reserved.</div>
+      </div>
+    </footer>
+  );
+}
+
+/* ---------- Cart drawer ---------- */
+function CartDrawer({ open, close, cart, change, clear }) {
+  const [name, setName] = useState(""); const [addr, setAddr] = useState(""); const [pay, setPay] = useState("Cash on Delivery (COD)"); const [err, setErr] = useState("");
+  const total = cart.reduce((a, i) => a + i.price * i.qty, 0);
+  const checkout = () => {
+    if (!name.trim() || !addr.trim()) { setErr("Please enter your name and delivery address."); return; }
+    const items = cart.map((it, k) => `${k + 1}. *${it.name}* (${it.size})\n   Qty: ${it.qty} | ₹${it.price * it.qty}`).join("\n");
+    const msg = `*NEW ORDER - HARI ASH NATURAL* 🛒\n--------------------\n👤 *Name:* ${name}\n📍 *Address:* ${addr}\n💳 *Payment:* ${pay}\n--------------------\n*ITEMS:*\n${items}\n--------------------\n💰 *TOTAL:* ₹${total}\n_Please confirm availability and dispatch time._`;
+    window.open(`https://wa.me/${WA}?text=${encodeURIComponent(msg)}`, "_blank");
+  };
+  useEffect(() => { document.body.style.overflow = open ? "hidden" : ""; const k = (e) => e.key === "Escape" && close(); window.addEventListener("keydown", k); return () => window.removeEventListener("keydown", k); }, [open]);
+  return (
+    <>
+      <div onClick={close} className={`fixed inset-0 z-50 bg-black/50 backdrop-blur-sm transition-opacity duration-300 ${open ? "opacity-100" : "opacity-0 pointer-events-none"}`}></div>
+      <aside aria-hidden={!open} className={`fixed top-0 right-0 z-50 h-full w-full sm:w-[420px] bg-white shadow-2xl flex flex-col transition-transform duration-300 ease-out ${open ? "translate-x-0" : "translate-x-full"}`}>
+        <div className="p-5 border-b flex items-center justify-between bg-brand-50/60">
+          <h3 className="font-bold text-lg flex items-center gap-2"><i className="fas fa-shopping-basket text-brand-600"></i> Your Order Basket</h3>
+          <button onClick={close} aria-label="Close cart" className="text-gray-400 hover:text-gray-700 hover:rotate-90 transition p-1"><i className="fas fa-times text-xl"></i></button>
+        </div>
+        <div className="flex-1 overflow-y-auto p-5">
+          {!cart.length ? <div className="text-center py-16"><i className="fas fa-shopping-cart text-gray-300 text-5xl mb-3"></i><p className="text-gray-500 font-medium text-sm">Your cart is empty.</p><span className="text-xs text-gray-400">Add fresh products to proceed.</span></div>
+          : cart.map(it => (
+            <div key={it.id} className="card-in flex items-center justify-between py-3 border-b border-gray-100">
+              <div className="min-w-0 pr-3"><h5 className="text-xs font-bold truncate">{it.name}</h5><span className="text-[11px] text-gray-500">Pack: {it.size} | ₹{it.price} each</span><p className="text-xs font-extrabold text-brand-600 mt-0.5">₹ {it.price * it.qty}</p></div>
+              <div className="flex items-center gap-2 border border-gray-200 rounded-lg px-2 py-1 bg-white shadow-sm shrink-0">
+                <button onClick={() => change(it.id, -1)} className="text-gray-500 hover:text-red-500 px-1 font-bold">−</button>
+                <span className="text-xs font-bold w-4 text-center">{it.qty}</span>
+                <button onClick={() => change(it.id, 1)} className="text-gray-500 hover:text-brand-600 px-1 font-bold">+</button>
+              </div>
+            </div>))}
+        </div>
+        {!!cart.length && (
+          <div className="card-in p-5 border-t bg-gray-50/70 space-y-3">
+            <div className="flex justify-between text-xs text-gray-600"><span>Delivery</span><span className="text-brand-600 font-semibold">Free (Local / Bulk)</span></div>
+            <div className="flex justify-between text-base font-extrabold"><span>Total Payable</span><span className="text-brand-600">₹ {total}</span></div>
+            <input value={name} onChange={e => setName(e.target.value)} placeholder="Your Name *" className="w-full text-xs p-2.5 rounded-lg border border-gray-300 outline-none focus:ring-1 focus:ring-brand-500" />
+            <input value={addr} onChange={e => setAddr(e.target.value)} placeholder="Delivery Address / City *" className="w-full text-xs p-2.5 rounded-lg border border-gray-300 outline-none focus:ring-1 focus:ring-brand-500" />
+            <div className="flex gap-4 text-xs font-medium">{["Cash on Delivery (COD)","Online UPI / Scanner"].map(m => <label key={m} className="flex items-center gap-1.5 cursor-pointer"><input type="radio" checked={pay === m} onChange={() => setPay(m)} /> {m.split(" (")[0].replace(" / Scanner", "")}</label>)}</div>
+            {err && <p className="text-xs text-red-600 font-medium">{err}</p>}
+            <button onClick={checkout} className="w-full py-3.5 bg-emerald-600 hover:bg-emerald-700 active:scale-[0.99] text-white rounded-xl font-bold text-sm flex items-center justify-center gap-2 shadow-lg transition"><i className="fab fa-whatsapp text-xl"></i> Order via WhatsApp</button>
+            <button onClick={clear} className="w-full text-xs text-gray-500 hover:text-red-500 transition">Clear basket</button>
+          </div>)}
+      </aside>
+    </>
+  );
+}
+
+/* ---------- App ---------- */
+function App() {
+  const [cart, setCart] = useState(() => { try { return JSON.parse(localStorage.getItem("ha_cart")) || []; } catch { return []; } });
+  const [wishlist, setWishlist] = useState([]);
+  const [open, setOpen] = useState(false);
+  const [filter, setFilter] = useState("all");
+  const [query, setQuery] = useState("");
+  const [toast, setToast] = useState("");
+  const [bump, setBump] = useState(0);
+  const tRef = useRef(null);
+  useEffect(() => { try { localStorage.setItem("ha_cart", JSON.stringify(cart)); } catch {} }, [cart]);
+  const say = (m) => { setToast(m); clearTimeout(tRef.current); tRef.current = setTimeout(() => setToast(""), 2200); };
+  const addToCart = (p, size, price) => {
+    const id = `${p.id}-${size}`;
+    setCart(c => c.some(i => i.id === id) ? c.map(i => i.id === id ? { ...i, qty: i.qty + 1 } : i) : [...c, { id, name: p.name, size, price, qty: 1 }]);
+    setBump(b => b + 1); say(`Added ${p.name} (${size}) to cart`);
+  };
+  const change = (id, d) => setCart(c => c.map(i => i.id === id ? { ...i, qty: i.qty + d } : i).filter(i => i.qty > 0));
+  const toggleWish = (id) => setWishlist(w => { const has = w.includes(id); say(has ? "Removed from wishlist" : "Added to wishlist"); return has ? w.filter(x => x !== id) : [...w, id]; });
+  const count = cart.reduce((a, i) => a + i.qty, 0);
+  const total = cart.reduce((a, i) => a + i.price * i.qty, 0);
+
+  return (
+    <>
+      <div className="bg-brand-900 text-brand-100 text-xs sm:text-sm py-2 px-4 text-center font-medium">
+        <i className="fas fa-leaf text-brand-500 mr-1.5"></i> 100% Natural &amp; No Preservatives <span className="mx-2 hidden md:inline">|</span>
+        <span className="hidden md:inline"><i className="fas fa-truck text-brand-500 mr-1.5"></i> Bulk Supply — Custom Packing <span className="mx-2">|</span></span>
+        <a href={`https://wa.me/${WA}`} className="text-white font-semibold hover:underline"><i className="fab fa-whatsapp text-emerald-400 mr-1"></i>8952919243</a>
+      </div>
+      <Header cartCount={count} wish={wishlist.length} query={query} setQuery={setQuery} openCart={() => setOpen(true)} bump={bump} />
+      <main>
+        <Hero /><Features />
+        <Categories goFilter={setFilter} />
+        <Products filter={filter} setFilter={setFilter} query={query} addToCart={addToCart} wishlist={wishlist} toggleWish={toggleWish} />
+        <Organic /><Bulk /><Why /><Testimonials /><Contact />
+      </main>
+      <Footer />
+
+      <div className="fixed bottom-6 right-6 z-40 flex flex-col items-end gap-3">
+        <a href={`https://wa.me/${WA}?text=${encodeURIComponent("Hi, I want to order from Hari Ash Natural Organics")}`} target="_blank" rel="noreferrer" aria-label="Chat on WhatsApp" className="w-12 h-12 bg-emerald-500 hover:bg-emerald-600 text-white rounded-full flex items-center justify-center text-2xl shadow-xl hover:scale-110 transition"><i className="fab fa-whatsapp"></i></a>
+        <button onClick={() => setOpen(true)} className={`flex items-center gap-2.5 bg-brand-600 hover:bg-brand-700 text-white px-5 py-3 rounded-full shadow-2xl hover:scale-105 transition-all duration-300 ${count ? "translate-y-0 opacity-100" : "translate-y-24 opacity-0 pointer-events-none"}`}>
+          <i className="fas fa-shopping-bag"></i><span className="font-bold text-sm">₹ {total}</span>
+          <span key={bump} className="pop bg-white text-brand-700 font-extrabold text-xs px-2 py-0.5 rounded-full">{count}</span>
+        </button>
+      </div>
+
+      <CartDrawer open={open} close={() => setOpen(false)} cart={cart} change={change} clear={() => setCart([])} />
+      <div className={`fixed bottom-6 left-1/2 -translate-x-1/2 z-[60] bg-gray-900/95 text-white px-5 py-2.5 rounded-full text-xs font-semibold shadow-xl pointer-events-none transition-all duration-300 ${toast ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`} role="status">{toast}</div>
+    </>
+  );
+}
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+</script>
+</body>
+</html>
